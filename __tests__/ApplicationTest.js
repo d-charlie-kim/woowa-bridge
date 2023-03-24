@@ -53,7 +53,7 @@ const expectBridgeOrder = (received, upside, downside) => {
 
 describe("다리 건너기 테스트", () => {
   test("다리 생성 테스트", () => {
-    const randomNumbers = ["1", "0", "0"];
+    const randomNumbers = [1, 0, 0];
     const mockGenerator = randomNumbers.reduce((acc, number) => {
       return acc.mockReturnValueOnce(number);
     }, jest.fn());
@@ -62,9 +62,9 @@ describe("다리 건너기 테스트", () => {
     expect(bridge).toEqual(["U", "D", "D"]);
   });
 
-  test("기능 테스트", () => {
+  test("성공 기능 테스트", () => {
     const logSpy = getLogSpy();
-    mockRandoms(["1", "0", "1"]);
+    mockRandoms([1, 0, 1]);
     mockQuestions(["3", "U", "D", "U"]);
 
     const app = new App();
@@ -79,6 +79,25 @@ describe("다리 건너기 테스트", () => {
       "총 시도한 횟수: 1",
     ]);
     expectBridgeOrder(log, "[ O |   | O ]", "[   | O |   ]");
+  });
+
+  test("실패 기능 테스트", () => {
+    const logSpy = getLogSpy();
+    mockRandoms([1, 0, 1, 0, 1]);
+    mockQuestions(["5", "U", "D", "U", "U", "Q"]);
+
+    const app = new App();
+    app.play();
+
+    const log = getOutput(logSpy);
+    expectLogContains(log, [
+      "최종 게임 결과",
+      "[ O |   | O | X ]",
+      "[   | O |   |   ]",
+      "게임 성공 여부: 실패",
+      "총 시도한 횟수: 1",
+    ]);
+    expectBridgeOrder(log, "[ O |   | O | X ]", "[   | O |   |   ]");
   });
 
   test("예외 테스트", () => {
